@@ -1,0 +1,4 @@
+module CassiopeiaPluginAPI {
+    header "CassiopeiaPluginAPI.h"
+    export *
+}
