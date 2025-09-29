@@ -10,6 +10,11 @@ let package = Package(
         .library(
             name: "Cassiopeia",
             targets: ["Cassiopeia"]),
+        .library(
+            name: "CassiopeiaDocuments",
+            type: .dynamic,
+            targets: ["CassiopeiaDocuments"]
+        ),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-crypto.git", from: "3.0.0"),
@@ -23,6 +28,11 @@ let package = Package(
                 .product(name: "Crypto", package: "swift-crypto"),
                 .product(name: "SWBUtil", package: "swift-build"),
             ]),
+        .target(
+            name: "CassiopeiaDocuments",
+            dependencies: ["Cassiopeia"],
+            resources: []
+        ),
         .testTarget(
             name: "CassiopeiaTests",
             dependencies: ["Cassiopeia"]
