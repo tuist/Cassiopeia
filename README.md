@@ -1,29 +1,30 @@
-# Cassiopeia
+# 🌌 Cassiopeia
 
-A Swift toolkit for building [swift-build](https://github.com/swiftlang/swift-build)-compliant Content Addressable Storage (CAS) systems.
+A Swift remote CAS client for [swift-build](https://github.com/swiftlang/swift-build) that talks HTTP to your caching service.
 
-## Overview
+> Cassiopeia’s name pays homage to Berlin—the city where Tuist was born—and to the Cassiopeia club that keeps the city dancing. This client aims to do the same for your builds: keep them moving fast.
 
-Cassiopeia is a Swift Package that provides the foundational components and utilities needed to implement Content Addressable Storage systems compatible with swift-build. CAS is a storage methodology where data is identified and retrieved based on its content (typically using cryptographic hashes) rather than its location, enabling efficient deduplication, integrity verification, and distributed storage capabilities.
+## 📖 Overview
 
-## Features
+Cassiopeia packages the primitives that swift-build expects (`CASProtocol`, `ActionCacheProtocol`) and implements them on top of an HTTP contract. Point the client at a remote service (via `COMPILATION_CACHE_REMOTE_SERVICE_PATH`) and it will push/pull objects, query existence, and manage the action cache over the network.
 
-- Swift-build compliant CAS implementations
-- Content-based addressing using cryptographic hashes
-- Efficient storage and retrieval mechanisms
-- Built-in deduplication support
-- Swift-native API design
-- Cross-platform compatibility
+## ✨ Features
 
-## Getting Started
+- Swift-build compliant CAS + action-cache client
+- Remote-only implementation that talks to an HTTP service
+- Content-based addressing using SHA256 digests
+- Minimal configuration: respects `COMPILATION_CACHE_REMOTE_SERVICE_PATH`
+- Swift-native API design with async/await
 
-### Prerequisites
+## 🚀 Getting Started
+
+### 📋 Prerequisites
 
 - Xcode 15.0 or later
 - Swift 5.9 or later
 - macOS 14.0 or later (for development)
 
-### Local Development Setup
+### 💻 Local Development Setup
 
 1. **Clone the repository**
    ```bash
@@ -46,7 +47,7 @@ Cassiopeia is a Swift Package that provides the foundational components and util
    swift test
    ```
 
-### Using as a Dependency
+### 📦 Using as a Dependency
 
 Add Cassiopeia to your `Package.swift` file:
 
@@ -65,14 +66,41 @@ Then add it as a dependency to your target:
 )
 ```
 
-## Architecture
+## 🏗️ Architecture
 
-Cassiopeia provides a modular architecture for building CAS storage systems that are compatible with swift-build requirements. It handles content addressing, storage backend abstraction, and provides utilities for integration with build systems.
+The library centres around the `RemoteCAS` actor. It takes care of:
 
-## Contributing
+- Encoding `CASObject` payloads and reference lists into JSON
+- Sending/receiving HTTP requests to the configured server
+- Translating status codes and payloads into Swift errors or values
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for the detailed HTTP contract the server is expected to implement. The same contract is also described in the root-level `cassiopeia-openapi.yaml` so you can feed it directly into tooling.
+
+### Quick Usage
+
+```swift
+import Cassiopeia
+
+// Explicit configuration
+let remote = Cassiopeia.makeRemoteCAS(
+    baseURL: URL(string: "https://cache.example.com/api")!,
+    headers: ["Authorization": "Bearer <token>"]
+)
+
+// Or derive everything from the environment
+// (expects COMPILATION_CACHE_REMOTE_SERVICE_PATH to be set)
+let envBacked = try Cassiopeia.makeRemoteCASFromEnvironment()
+
+// Store some bytes
+let object = CASObject(string: "hello caches")
+let id = try await remote.store(object: object)
+
+// Later, look it up
+if let restored = try await remote.load(id: id) {
+    print(restored.data.stringValue ?? "")
+}
+```
+
+## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-
-[License information to be added]

@@ -2,7 +2,6 @@ import Foundation
 import SWBUtil
 
 public struct CASObject: CASObjectProtocol, Equatable, Sendable {
-
     public let data: ByteString
     public let refs: [DataID]
 
