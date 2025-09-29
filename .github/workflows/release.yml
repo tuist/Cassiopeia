@@ -19,7 +19,7 @@ permissions:
 jobs:
   release:
     name: Release
-    runs-on: "macos-latest"
+    runs-on: "namespace-profile-default-macos"
     timeout-minutes: 15
     if: "!startsWith(github.event.head_commit.message, '[Release]')"
     steps:
