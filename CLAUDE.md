@@ -45,9 +45,9 @@ Cassiopeia is a **remote-first Content Addressable Storage (CAS) client** for sw
 - These match the swift-build contract
 
 ### HTTP Contract
-See `ARCHITECTURE.md` and `cassiopeia-openapi.yaml` for the full HTTP contract specification.
+See `ARCHITECTURE.md` and `openapi.yaml` for the full HTTP contract specification.
 
-**IMPORTANT**: When modifying the HTTP implementation in `RemoteCAS.swift`, always update `cassiopeia-openapi.yaml` to keep the spec in sync with the implementation.
+**IMPORTANT**: When modifying the HTTP implementation in `RemoteCAS.swift`, always update `openapi.yaml` to keep the spec in sync with the implementation.
 
 Key points:
 - Base URL from `COMPILATION_CACHE_REMOTE_SERVICE_PATH`

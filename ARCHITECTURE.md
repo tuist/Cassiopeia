@@ -2,7 +2,7 @@
 
 ## Overview
 
-Cassiopeia is now a remote-first Content Addressable Storage (CAS) client. The library speaks a small HTTP-based protocol to a backing CAS service and exposes the same Swift-facing primitives (`CASProtocol`, `ActionCacheProtocol`) that swift-build expects. All persistence and deduplication lives on the server side – Cassiopeia focuses on reliably shuttling data between the build system and that service. The protocol is mirrored in the root-level OpenAPI specification `cassiopeia-openapi.yaml`.
+Cassiopeia is now a remote-first Content Addressable Storage (CAS) client. The library speaks a small HTTP-based protocol to a backing CAS service and exposes the same Swift-facing primitives (`CASProtocol`, `ActionCacheProtocol`) that swift-build expects. All persistence and deduplication lives on the server side – Cassiopeia focuses on reliably shuttling data between the build system and that service. The protocol is mirrored in the root-level OpenAPI specification `openapi.yaml`.
 
 The remote endpoint to talk to is discovered via the `COMPILATION_CACHE_REMOTE_SERVICE_PATH` environment variable. When present, `Cassiopeia.makeRemoteCASFromEnvironment()` builds a `RemoteCAS` instance that routes all requests to the configured URL.
 

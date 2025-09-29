@@ -2,7 +2,10 @@
 
 A Swift remote CAS client for [swift-build](https://github.com/swiftlang/swift-build) that talks HTTP to your caching service.
 
-> Cassiopeia’s name pays homage to Berlin—the city where Tuist was born—and to the Cassiopeia club that keeps the city dancing. This client aims to do the same for your builds: keep them moving fast.
+> [!TIP]
+> If you need a fast, reliable, and secure CAS server, you can use [Tuist's edge cache network](https://tuist.dev) that works seamlessly across environments (e.g. CI, local development).
+
+> Cassiopeia's name pays homage to Berlin—the city where Tuist was born—and to the Cassiopeia club that keeps the city dancing. This client aims to do the same for your builds: keep them moving fast.
 
 ## 📖 Overview
 
@@ -74,38 +77,9 @@ The library centres around the `RemoteCAS` actor. It takes care of:
 - Sending/receiving HTTP requests to the configured server
 - Translating status codes and payloads into Swift errors or values
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for the detailed HTTP contract the server is expected to implement. The same contract is also described in the root-level `cassiopeia-openapi.yaml` so you can feed it directly into tooling or server implementations.
-
-> **Note**: When modifying the HTTP implementation, always keep `cassiopeia-openapi.yaml` in sync with the code.
+See [ARCHITECTURE.md](ARCHITECTURE.md) and [openapi.yaml](openapi.yaml) for the detailed HTTP contract the server is expected to implement.
 
 ### Quick Usage
-
-#### As a Swift Library
-
-```swift
-import Cassiopeia
-
-// Explicit configuration
-let remote = Cassiopeia.makeRemoteCAS(
-    baseURL: URL(string: "https://cache.example.com/api")!,
-    headers: ["Authorization": "Bearer <token>"]
-)
-
-// Or derive everything from the environment
-// (expects COMPILATION_CACHE_REMOTE_SERVICE_PATH to be set)
-let envBacked = try Cassiopeia.makeRemoteCASFromEnvironment()
-
-// Store some bytes
-let object = CASObject(string: "hello caches")
-let id = try await remote.store(object: object)
-
-// Later, look it up
-if let restored = try await remote.load(id: id) {
-    print(restored.data.stringValue ?? "")
-}
-```
-
-#### With swift-build
 
 To use Cassiopeia as a remote CAS plugin with swift-build, configure these build settings:
 
@@ -121,6 +95,9 @@ COMPILATION_CACHE_REMOTE_SERVICE_PATH=https://cache.example.com/api
 ```
 
 The plugin will automatically load and use the remote CAS for all build artifact caching.
+
+> [!NOTE]
+> If you are using Tuist via `tuist dev` or `tuist xcodebuild`, the configuration is set automatically.
 
 ## 🤝 Contributing
 
