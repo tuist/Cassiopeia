@@ -1,0 +1,269 @@
+openapi: 3.0.3
+info:
+  title: Cassiopeia Remote CAS API
+  description: |
+    HTTP-based Content Addressable Storage (CAS) and Action Cache API for swift-build.
+
+    This API enables remote caching of build artifacts using content-addressed storage
+    with SHA256 digests. Binary data is base64-encoded in JSON payloads, and object
+    references are represented as hex-encoded SHA256 hashes.
+  version: 1.0.0
+  contact:
+    name: Tuist
+    url: https://github.com/tuist/Cassiopeia
+
+servers:
+  - url: https://cache.example.com/api
+    description: Example remote CAS server
+
+paths:
+  /cas/objects:
+    post:
+      summary: Store a CAS object
+      description: |
+        Stores a new content-addressed object with its data and references to other objects.
+        Returns the SHA256 digest that identifies this object.
+      operationId: storeObject
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreObjectRequest'
+      responses:
+        '200':
+          description: Object stored successfully (if object already exists)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectIDResponse'
+        '201':
+          description: Object created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectIDResponse'
+        '400':
+          description: Invalid request (malformed JSON or base64)
+          content:
+            text/plain:
+              schema:
+                type: string
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server error
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  /cas/objects/{dataId}:
+    parameters:
+      - name: dataId
+        in: path
+        required: true
+        description: SHA256 hash of the object (hex-encoded)
+        schema:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
+          example: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+
+    get:
+      summary: Load a CAS object
+      description: |
+        Retrieves the data and references for a previously stored object.
+      operationId: loadObject
+      responses:
+        '200':
+          description: Object found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectPayload'
+        '404':
+          description: Object not found
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server error
+          content:
+            text/plain:
+              schema:
+                type: string
+
+    head:
+      summary: Check if object exists
+      description: |
+        Checks whether an object with the given digest exists in the CAS.
+      operationId: containsObject
+      responses:
+        '200':
+          description: Object exists
+        '404':
+          description: Object does not exist
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server error
+
+    delete:
+      summary: Delete a CAS object
+      description: |
+        Deletes an object from the CAS. Deleting a non-existent object should
+        return either 204 or 404.
+      operationId: deleteObject
+      responses:
+        '200':
+          description: Object deleted successfully
+        '204':
+          description: Object deleted successfully (no content)
+        '404':
+          description: Object does not exist (acceptable response)
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server error
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  /cas/action-cache/{keyId}:
+    parameters:
+      - name: keyId
+        in: path
+        required: true
+        description: SHA256 hash of the action key (hex-encoded)
+        schema:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
+          example: 'a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456'
+
+    put:
+      summary: Store action cache mapping
+      description: |
+        Associates an action key with a result object ID. Used to cache build action results.
+      operationId: cacheActionResult
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CacheValuePayload'
+      responses:
+        '200':
+          description: Mapping stored successfully
+        '204':
+          description: Mapping stored successfully (no content)
+        '400':
+          description: Invalid request
+          content:
+            text/plain:
+              schema:
+                type: string
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server error
+          content:
+            text/plain:
+              schema:
+                type: string
+
+    get:
+      summary: Lookup cached action result
+      description: |
+        Retrieves the result object ID for a previously cached action.
+      operationId: lookupCachedAction
+      responses:
+        '200':
+          description: Cache hit - returns the result object ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CacheValuePayload'
+        '404':
+          description: Cache miss - no result cached for this action
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server error
+          content:
+            text/plain:
+              schema:
+                type: string
+
+components:
+  schemas:
+    StoreObjectRequest:
+      type: object
+      required:
+        - data
+        - refs
+      properties:
+        data:
+          type: string
+          format: byte
+          description: Base64-encoded binary data of the object
+          example: 'SGVsbG8gV29ybGQh'
+        refs:
+          type: array
+          description: Array of SHA256 hashes (hex-encoded) referencing other CAS objects
+          items:
+            type: string
+            pattern: '^[a-f0-9]{64}$'
+          example: []
+
+    ObjectIDResponse:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
+          description: SHA256 hash (hex-encoded) identifying the stored object
+          example: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+
+    ObjectPayload:
+      type: object
+      required:
+        - data
+        - refs
+      properties:
+        data:
+          type: string
+          format: byte
+          description: Base64-encoded binary data of the object
+          example: 'SGVsbG8gV29ybGQh'
+        refs:
+          type: array
+          description: Array of SHA256 hashes (hex-encoded) referencing other CAS objects
+          items:
+            type: string
+            pattern: '^[a-f0-9]{64}$'
+          example: []
+
+    CacheValuePayload:
+      type: object
+      required:
+        - object_id
+      properties:
+        object_id:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
+          description: SHA256 hash (hex-encoded) of the result object
+          example: 'a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456'
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: |
+        Optional bearer token authentication. The RemoteCAS client can be configured
+        with custom headers including Authorization headers.
+
+security:
+  - bearerAuth: []
+  - {} # Allow unauthenticated access (server dependent)
