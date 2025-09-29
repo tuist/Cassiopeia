@@ -59,10 +59,11 @@ jobs:
         run: git cliff --bump -o CHANGELOG.md
       - name: Build dylib artifact
         if: env.should-release == 'true'
-        run: |
-          mise run bundle
-          cd build
-          tar -czf libCassiopeia-${{ steps.next-version.outputs.NEXT_VERSION }}.tar.gz libCassiopeia.dylib
+        env:
+          BASE_64_DEVELOPER_ID_APPLICATION_CERTIFICATE: ${{ secrets.BASE_64_DEVELOPER_ID_APPLICATION_CERTIFICATE }}
+          CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }}
+          APP_SPECIFIC_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
+        run: mise run bundle
       - name: Commit changes
         id: auto-commit-action
         uses: stefanzweifel/git-auto-commit-action@v6
@@ -93,4 +94,4 @@ jobs:
           body: ${{ steps.release-notes.outputs.RELEASE_NOTES }}
           target_commitish: ${{ steps.auto-commit-action.outputs.commit_hash }}
           files: |
-            build/libCassiopeia-${{ steps.next-version.outputs.NEXT_VERSION }}.tar.gz
+            build/libCassiopeia.tar.gz
