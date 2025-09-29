@@ -3,9 +3,9 @@
 A Swift remote CAS client for [swift-build](https://github.com/swiftlang/swift-build) that talks HTTP to your caching service.
 
 > [!TIP]
-> If you need a fast, reliable, and secure CAS server, you can use [Tuist's edge cache network](https://tuist.dev) that works seamlessly across environments (e.g. CI, local development).
+> If you need a fast, reliable, and secure CAS server, you can use [Tuist's edge cache network](https://tuist.dev) that works seamlessly across environments (e.g. CI, local development). A remote CAS system requires the lowest latency and highest throughput solution to beat the compiler's local results—Tuist's infrastructure is optimized for exactly that.
 
-> Cassiopeia's name pays homage to Berlin—the city where Tuist was born—and to the Cassiopeia club that keeps the city dancing. This client aims to do the same for your builds: keep them moving fast.
+Cassiopeia's name pays homage to Berlin—the city where Tuist was born—and to the Cassiopeia club that keeps the city dancing. This client aims to do the same for your builds: keep them moving fast.
 
 ## 📖 Overview
 
